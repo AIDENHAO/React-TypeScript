@@ -1,0 +1,223 @@
+:root {
+  --primary-color: #4f46e5;
+  --secondary-color: #7c3aed;
+  --accent-color: #f59e0b;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f1f5f9;
+  --border-radius: 8px;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.characterPanel {
+  background-color: var(--bg-primary);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  max-width: 800px;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--bg-secondary);
+
+  h2 {
+    color: var(--primary-color);
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .infoIcon {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: help;
+  }
+}
+
+.characterInfo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  .avatar {
+    margin-right: 1.5rem;
+
+    .avatarPlaceholder {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+  }
+
+  .basicInfo {
+    .levelInfo,
+    .titleInfo,
+    .reputationInfo {
+      color: var(--text-secondary);
+      margin: 0.25rem 0;
+      font-size: 0.9rem;
+    }
+
+    h3 {
+      margin: 0 0 0.5rem 0;
+      color: var(--text-primary);
+    }
+  }
+}
+
+.attributesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.sectionTitle {
+  color: var(--text-primary);
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+
+  &::after {
+    content: '';
+    flex-grow: 1;
+    height: 1px;
+    background-color: var(--bg-secondary);
+    margin-left: 0.5rem;
+  }
+}
+
+.attributesList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.attributeItem {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  border-radius: var(--border-radius);
+  background-color: var(--bg-secondary);
+
+  .attributeName {
+    color: var(--text-secondary);
+  }
+
+  .attributeValue {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+}
+
+.resourcesSection {
+  margin-bottom: 1.5rem;
+}
+
+.resourcesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.resourceItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  background-color: var(--bg-secondary);
+
+  .resourceIcon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .resourceName {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .resourceValue {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+}
+
+.actionButtons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.actionButton {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--border-radius);
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #4338ca;
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.loading,
+.error {
+  padding: 2rem;
+  text-align: center;
+  border-radius: var(--border-radius);
+  background-color: var(--bg-secondary);
+}
+
+.error {
+  color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .attributesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .characterInfo {
+    flex-direction: column;
+    text-align: center;
+
+    .avatar {
+      margin-right: 0;
+      margin-bottom: 1rem;
+    }
+
+    .basicInfo {
+      width: 100%;
+    }
+  }
+
+  .actionButtons {
+    justify-content: center;
+  }
+}

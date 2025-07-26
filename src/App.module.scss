@@ -1,0 +1,44 @@
+:root {
+  --primary-color: #6366f1;
+  --secondary-color: #10b981;
+  --bg-color: #f8fafc;
+  --text-color: #1e293b;
+  --panel-gap: 2rem;
+  --container-max-width: 1400px;
+}
+
+.appContainer {
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  padding: 1rem;
+}
+
+.mainContent {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+}
+
+.pageTitle {
+  color: var(--primary-color);
+  text-align: center;
+  margin: 2rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.panelsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--panel-gap);
+
+  @media (min-width: 1024px) {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+@media (min-width: 1024px) {
+  .panelsContainer > * {
+    flex: 1;
+  }
+}

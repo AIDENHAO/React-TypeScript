@@ -1,0 +1,25 @@
+{
+  "name": "react-typescript",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "React TypeScript on CloudStudio, using Vite bundler",
+  "scripts": {
+    "dev": "vite --port 3000",
+    "build": "tsc && vite build --port 3000",
+    "preview": "vite preview --port 3000"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^2.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sass": "^1.89.2",
+    "typescript": "^4.7.4",
+    "vite": "^3.0.4"
+  }
+}

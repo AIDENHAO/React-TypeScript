@@ -1,0 +1,132 @@
+{
+  "character": {
+    "baseAttributes": {
+      "id": "char_001",
+      "name": "剑仙李白",
+      "level": 15,
+      "exp": 1250,
+      "expToNextLevel": 2000,
+      "health": 1250,
+      "mana": 850,
+      "attack": 185,
+      "defense": 105,
+      "speed": 92,
+      "critRate": 12.5,
+      "dodgeRate": 8.3
+    },
+    "derivedAttributes": {
+      "totalAttack": 256,
+      "totalDefense": 142,
+      "damageMultiplier": 1.2,
+      "survivalRating": 78
+    },
+    "title": {
+      "id": "title_003",
+      "name": "江湖小虾",
+      "description": "初入江湖的修行者",
+      "attributeBonuses": {
+        "attack": 10,
+        "defense": 5
+      },
+      "requirements": {
+        "level": 10,
+        "reputation": 1000
+      }
+    },
+    "reputation": 1250,
+    "currency": {
+      "gold": 12500,
+      "gems": 850,
+      "contribution": 320
+    },
+    "lastActive": "2023-11-15T14:30:00Z"
+  },
+  "clan": {
+    "id": "clan_001",
+    "name": "青云宗",
+    "levelInfo": {
+      "level": 3,
+      "exp": 5250,
+      "expToNextLevel": 10000
+    },
+    "memberCount": 85,
+    "maxMembers": 100,
+    "activeMembers": 68,
+    "resourceStorage": {
+      "spiritStones": 12500,
+      "materials": {
+        "wood": 8500,
+        "ore": 5200,
+        "herb": 3800
+      }
+    },
+    "territoryArea": 3000,
+    "production": {
+      "spiritStoneRate": 500,
+      "materialRate": 120,
+      "contributionRate": 115,
+      "expBonus": 25
+    },
+    "defense": {
+      "formationStrength": 850,
+      "buildingDefense": 1250,
+      "counterAttack": 120,
+      "alertLevel": 75
+    },
+    "buildings": [
+      {
+        "id": "building_001",
+        "type": "formation",
+        "name": "护宗大阵",
+        "level": 3,
+        "defenseValue": 450,
+        "isFunctional": true,
+        "lastRepaired": "2023-11-14T09:15:00Z"
+      },
+      {
+        "id": "building_002",
+        "type": "storage",
+        "name": "资源仓库",
+        "level": 4,
+        "defenseValue": 320,
+        "isFunctional": true,
+        "lastRepaired": "2023-11-12T16:40:00Z"
+      },
+      {
+        "id": "building_003",
+        "type": "recruitment",
+        "name": "招新广场",
+        "level": 2,
+        "defenseValue": 280,
+        "isFunctional": true,
+        "lastRepaired": "2023-11-10T11:25:00Z"
+      },
+      {
+        "id": "building_004",
+        "type": "training",
+        "name": "修炼场",
+        "level": 3,
+        "defenseValue": 200,
+        "isFunctional": true,
+        "lastRepaired": "2023-11-13T15:30:00Z"
+      }
+    ]
+  },
+  "attributeDefinitions": {
+    "characterBaseAttrs": [
+      {"name": "health", "displayName": "生命值", "unit": "", "minValue": 0},
+      {"name": "mana", "displayName": "法力值", "unit": "", "minValue": 0},
+      {"name": "attack", "displayName": "攻击力", "unit": "", "minValue": 1},
+      {"name": "defense", "displayName": "防御力", "unit": "", "minValue": 1},
+      {"name": "speed", "displayName": "速度", "unit": "", "minValue": 1},
+      {"name": "critRate", "displayName": "暴击率", "unit": "%", "minValue": 0, "maxValue": 100},
+      {"name": "dodgeRate", "displayName": "闪避率", "unit": "%", "minValue": 0, "maxValue": 100}
+    ],
+    "clanBaseAttrs": [
+      {"name": "spiritStones", "displayName": "灵石", "unit": "个", "minValue": 0},
+      {"name": "territoryArea", "displayName": "领地面积", "unit": "㎡", "minValue": 0},
+      {"name": "memberCount", "displayName": "成员数量", "unit": "人", "minValue": 1},
+      {"name": "formationStrength", "displayName": "大阵强度", "unit": "", "minValue": 0}
+    ]
+  }
+}

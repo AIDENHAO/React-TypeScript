@@ -1,0 +1,132 @@
+[
+  {
+    "id": "char_001",
+    "name": "剑仙李白",
+    "level": 15,
+    "exp": 1250,
+    "expToNextLevel": 2000,
+    "cultivation": 8547,
+    "cultivationStage": "筑基·中期",
+    "affinity": {
+      "metal": 75,
+      "wood": 45,
+      "water": 60,
+      "fire": 85,
+      "earth": 30
+    },
+    "health": 1250,
+    "maxHealth": 1250,
+    "mana": 850,
+    "maxMana": 850,
+    "spirit": 350,
+    "maxSpirit": 350,
+    "soulStrength": 245,
+    "physique": 180,
+    "vitality": 18000,
+    "attack": 185,
+    "defense": 105,
+    "speed": 92,
+    "critRate": 12.5,
+    "dodgeRate": 8.3,
+    "cultivationSpeed": 15,
+    "breakthroughChance": 75,
+    "reputation": 1250,
+    "currency": {
+      "copper": 50000,
+      "silver": 500,
+      "gold": 125,
+      "spiritStones": {
+        "low": 85,
+        "mid": 8,
+        "high": 1,
+        "supreme": 0
+      },
+      "contribution": 320,
+      "worldReputation": 150
+    },
+    "title": {
+      "sect": "入门弟子",
+      "world": "新秀"
+    },
+    "faction": {
+      "region": "青岚山脉",
+      "country": "大夏王朝",
+      "sect": "天剑门"
+    },
+    "battlePower": 25600,
+    "honor": 1250,
+    "sectRelations": {
+      "天剑门": 850,
+      "玄天宗": 120,
+      "血魔教": -200
+    },
+    "specialConstitution": null,
+    "battleTendency": "攻击型",
+    "lastActive": "2024-01-15T10:30:00Z"
+  },
+  {
+    "id": "char_002",
+    "name": "玄女苏妲己",
+    "level": 22,
+    "exp": 3200,
+    "expToNextLevel": 4500,
+    "cultivation": 15680,
+    "cultivationStage": "开光·初期",
+    "affinity": {
+      "metal": 30,
+      "wood": 80,
+      "water": 90,
+      "fire": 25,
+      "earth": 55
+    },
+    "health": 1800,
+    "maxHealth": 1800,
+    "mana": 1450,
+    "maxMana": 1450,
+    "spirit": 580,
+    "maxSpirit": 580,
+    "soulStrength": 380,
+    "physique": 220,
+    "vitality": 28000,
+    "attack": 145,
+    "defense": 180,
+    "speed": 125,
+    "critRate": 8.5,
+    "dodgeRate": 15.2,
+    "cultivationSpeed": 22,
+    "breakthroughChance": 68,
+    "reputation": 2850,
+    "currency": {
+      "copper": 120000,
+      "silver": 1200,
+      "gold": 285,
+      "spiritStones": {
+        "low": 185,
+        "mid": 22,
+        "high": 3,
+        "supreme": 0
+      },
+      "contribution": 680,
+      "worldReputation": 320
+    },
+    "title": {
+      "sect": "内门弟子",
+      "world": "新秀"
+    },
+    "faction": {
+      "region": "碧水仙境",
+      "country": "大夏王朝",
+      "sect": "玄天宗"
+    },
+    "battlePower": 42300,
+    "honor": 2850,
+    "sectRelations": {
+      "玄天宗": 950,
+      "天剑门": 300,
+      "血魔教": -150
+    },
+    "specialConstitution": "水灵体",
+    "battleTendency": "辅助型",
+    "lastActive": "2024-01-15T14:20:00Z"
+  }
+]

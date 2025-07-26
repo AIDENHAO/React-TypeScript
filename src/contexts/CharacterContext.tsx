@@ -1,5 +1,8 @@
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import { Character } from '../types/Character';
+import { CultivationService } from '../services/CultivationService';
+import { DataService } from '../services/DataService';
+import type { CultivationResult, BreakthroughResult } from '../services/CultivationService';
 
 // 定义Action类型
 type CharacterAction = 
@@ -8,20 +11,25 @@ type CharacterAction =
   | { type: 'FETCH_CHARACTER_ERROR'; payload: string }
   | { type: 'UPDATE_CHARACTER_ATTRIBUTES'; payload: Partial<Character['baseAttrs']> }
   | { type: 'UPDATE_CHARACTER_TITLE'; payload: Character['title'] }
-  | { type: 'CULTIVATE' }
-  | { type: 'BREAKTHROUGH_ATTEMPT' }
-  | { type: 'BREAKTHROUGH_SUCCESS' }
-  | { type: 'BREAKTHROUGH_FAILURE' };
+  | { type: 'CULTIVATE_SUCCESS'; payload: CultivationResult }
+  | { type: 'BREAKTHROUGH_SUCCESS'; payload: BreakthroughResult }
+  | { type: 'BREAKTHROUGH_FAILURE'; payload: BreakthroughResult }
+  | { type: 'SAVE_CHARACTER' };
 
 // 定义Context类型
 interface CharacterContextType {
   data: Character | null;
   loading: boolean;
   error: string | null;
+  lastCultivationResult: CultivationResult | null;
+  lastBreakthroughResult: BreakthroughResult | null;
   updateAttributes: (attrs: Partial<Character['baseAttrs']>) => void;
   updateTitle: (title: Character['title']) => void;
   cultivate: () => void;
   breakthrough: () => void;
+  saveCharacter: () => void;
+  switchCharacter: (id: string) => void;
+  createNewCharacter: (characterData: Omit<Character, 'baseAttrs'> & { baseAttrs: Omit<Character['baseAttrs'], 'id'> }) => void;
 }
 
 // 初始状态定义与类型
@@ -29,27 +37,51 @@ interface CharacterState {
   data: Character | null;
   loading: boolean;
   error: string | null;
+  lastCultivationResult: CultivationResult | null;
+  lastBreakthroughResult: BreakthroughResult | null;
 }
 
 const initialState: CharacterState = {
   data: null,
   loading: false,
-  error: null
+  error: null,
+  lastCultivationResult: null,
+  lastBreakthroughResult: null
 };
 
 // 创建Context
 const CharacterContext = createContext<CharacterContextType | undefined>(undefined);
 
-// 确保Context类型安全的辅助函数
-const useSafeContext = <T,>(context: React.Context<T | undefined>, name: string): T => {
-  const value = useContext(context);
-  if (value === undefined) {
-    throw new Error(`use${name} must be used within a ${name}Provider`);
-  }
-  return value;
+// 计算衍生属性的辅助函数
+function calculateDerivedAttributes(baseAttrs: Character['baseAttrs'], character?: Character): Character['derivedAttrs'] {
+  // 创建一个临时的Character对象用于计算
+  const tempCharacter: Character = character || {
+    baseAttrs,
+    derivedAttrs: {
+      totalAttack: 0,
+      totalDefense: 0,
+      damageMultiplier: 0,
+      survivalRating: 0,
+      cultivationSpeed: 0,
+      breakthroughChance: 0
+    },
+    title: null,
+    reputation: 0,
+    currency: { gold: 0, gems: 0, contribution: 0 },
+    lastActive: new Date()
+  };
+
+  return {
+    totalAttack: baseAttrs.attack + Math.floor(baseAttrs.attack * 0.2),
+    totalDefense: baseAttrs.defense + Math.floor(baseAttrs.defense * 0.2),
+    damageMultiplier: 1 + (baseAttrs.critRate / 100),
+    survivalRating: Math.floor((baseAttrs.health + baseAttrs.defense) / 20),
+    cultivationSpeed: CultivationService.calculateCultivationSpeed(tempCharacter),
+    breakthroughChance: CultivationService.calculateBreakthroughChance(tempCharacter)
+  };
 }
 
-// Reducer函数 - 修复所有类型错误
+// Reducer函数
 function characterReducer(state: CharacterState, action: CharacterAction): CharacterState {
   switch (action.type) {
     case 'FETCH_CHARACTER_START':
@@ -73,1008 +105,232 @@ function characterReducer(state: CharacterState, action: CharacterAction): Chara
       };
     case 'UPDATE_CHARACTER_ATTRIBUTES':
       if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            ...action.payload
-          },
-          derivedAttrs: calculateDerivedAttributes({
-            ...state.data.baseAttrs,
-            ...action.payload
-          })
-        }
-      };
-    case 'UPDATE_CHARACTER_TITLE':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          title: action.payload
-        }
-      };
-    case 'INCREASE_CHARACTER_LEVEL':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          level: state.data.level + 1,
-          cultivationStage: getNextCultivationStage(state.data.level + 1)
-        }
-      };
-    case 'UPDATE_CHARACTER_REPUTATION':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          reputation: (state.data.reputation || 0) + action.payload
-        }
-      };
-    default:
-      return state;
-  }
-}
-  switch (action.type) {
-    case 'FETCH_CHARACTER_START':
-      return {
-        ...state,
-        loading: true,
-        error: null
-      };
-    case 'FETCH_CHARACTER_SUCCESS':
-      return {
-        ...state,
-        data: action.payload,
-        loading: false,
-        error: null
-      };
-    case 'FETCH_CHARACTER_ERROR':
-      return {
-        ...state,
-        loading: false,
-        error: action.payload
-      };
-    case 'UPDATE_CHARACTER_ATTRIBUTES':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            ...action.payload
-          },
-          derivedAttrs: calculateDerivedAttributes({
-            ...state.data.baseAttrs,
-            ...action.payload
-          })
-        }
-      };
-    case 'UPDATE_CHARACTER_TITLE':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          title: action.payload
-        }
-      };
-    case 'INCREASE_CHARACTER_LEVEL':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          level: state.data.level + 1,
-          cultivationStage: getNextCultivationStage(state.data.level + 1)
-        }
-      };
-    case 'UPDATE_CHARACTER_REPUTATION':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          reputation: (state.data.reputation || 0) + action.payload
-        }
-      };
-    default:
-      return state;
-  }
-}
-  switch (action.type) {
-    case 'FETCH_CHARACTER_START':
-      return {
-        ...state,
-        loading: true,
-        error: null
-      };
-    case 'FETCH_CHARACTER_SUCCESS':
-      return {
-        ...state,
-        data: action.payload,
-        loading: false,
-        error: null
-      };
-    case 'FETCH_CHARACTER_ERROR':
-      return {
-        ...state,
-        loading: false,
-        error: action.payload
-      };
-    case 'UPDATE_CHARACTER_ATTRIBUTES':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            ...action.payload
-          },
-          derivedAttrs: calculateDerivedAttributes({
-            ...state.data.baseAttrs,
-            ...action.payload
-          })
-        }
-      };
-    case 'UPDATE_CHARACTER_TITLE':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          title: action.payload
-        }
-      };
-    case 'INCREASE_CHARACTER_LEVEL':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          level: state.data.level + 1,
-          cultivationStage: getNextCultivationStage(state.data.level + 1)
-        }
-      };
-    case 'UPDATE_CHARACTER_REPUTATION':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          reputation: (state.data.reputation || 0) + action.payload
-        }
-      };
-    default:
-      return state;
-  }
-}
-  switch (action.type) {
-    case 'FETCH_CHARACTER_START':
-      return {
-        ...state,
-        loading: true,
-        error: null
-      };
-    case 'FETCH_CHARACTER_SUCCESS':
-      return {
-        ...state,
-        data: action.payload,
-        loading: false,
-        error: null
-      };
-    case 'FETCH_CHARACTER_ERROR':
-      return {
-        ...state,
-        loading: false,
-        error: action.payload
-      };
-    case 'UPDATE_CHARACTER_ATTRIBUTES':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            ...action.payload
-          },
-          derivedAttrs: calculateDerivedAttributes({
-            ...state.data.baseAttrs,
-            ...action.payload
-          })
-        }
-      };
-    case 'UPDATE_CHARACTER_TITLE':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          title: action.payload
-        }
-      };
-    case 'INCREASE_CHARACTER_LEVEL':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          level: state.data.level + 1,
-          cultivationStage: getNextCultivationStage(state.data.level + 1)
-        }
-      };
-    case 'UPDATE_CHARACTER_REPUTATION':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          reputation: (state.data.reputation || 0) + action.payload
-        }
-      };
-    default:
-      return state;
-  }
-}
-  switch (action.type) {
-    case 'FETCH_CHARACTER_START':
-      return {
-        ...state,
-        loading: true,
-        error: null
-      };
-    case 'FETCH_CHARACTER_SUCCESS':
-      return {
-        ...state,
-        data: action.payload,
-        loading: false,
-        error: null
-      };
-    case 'FETCH_CHARACTER_ERROR':
-      return {
-        ...state,
-        loading: false,
-        error: action.payload
-      };
-    case 'UPDATE_CHARACTER_ATTRIBUTES':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            ...action.payload
-          },
-          derivedAttrs: calculateDerivedAttributes({
-            ...state.data.baseAttrs,
-            ...action.payload
-          })
-        }
-      };
-    case 'UPDATE_CHARACTER_TITLE':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          title: action.payload
-        }
-      };
-    case 'INCREASE_CHARACTER_LEVEL':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          level: state.data.level + 1,
-          cultivationStage: getNextCultivationStage(state.data.level + 1)
-        }
-      };
-    case 'UPDATE_CHARACTER_REPUTATION':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          reputation: (state.data.reputation || 0) + action.payload
-        }
-      };
-    default:
-      return state;
-  }
-}
-  switch (action.type) {
-    case 'FETCH_CHARACTER_START':
-      return {
-        ...state,
-        loading: true,
-        error: null
-      };
-    case 'FETCH_CHARACTER_SUCCESS':
-      return {
-        ...state,
-        data: action.payload,
-        loading: false,
-        error: null
-      };
-    case 'FETCH_CHARACTER_ERROR':
-      return {
-        ...state,
-        loading: false,
-        error: action.payload
-      };
-    case 'UPDATE_CHARACTER_ATTRIBUTES':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            ...action.payload
-          },
-          derivedAttrs: calculateDerivedAttributes({
-            ...state.data.baseAttrs,
-            ...action.payload
-          })
-        }
-      };
-    case 'UPDATE_CHARACTER_TITLE':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          title: action.payload
-        }
-      };
-    case 'INCREASE_CHARACTER_LEVEL':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          level: state.data.level + 1,
-          cultivationStage: getNextCultivationStage(state.data.level + 1)
-        }
-      };
-    case 'UPDATE_CHARACTER_REPUTATION':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          reputation: (state.data.reputation || 0) + action.payload
-        }
-      };
-    default:
-      return state;
-  }
-}
-  switch (action.type) {
-    case 'FETCH_CHARACTER_START':
-      return {
-        ...state,
-        loading: true,
-        error: null
-      };
-    case 'FETCH_CHARACTER_SUCCESS':
-      return {
-        ...state,
-        data: action.payload,
-        loading: false,
-        error: null
-      };
-    case 'FETCH_CHARACTER_ERROR':
-      return {
-        ...state,
-        loading: false,
-        error: action.payload
-      };
-    case 'UPDATE_CHARACTER_ATTRIBUTES':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            ...action.payload
-          },
-          derivedAttrs: calculateDerivedAttributes({
-            ...state.data.baseAttrs,
-            ...action.payload
-          })
-        }
-      };
-    case 'UPDATE_CHARACTER_TITLE':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          title: action.payload
-        }
-      };
-    case 'INCREASE_CHARACTER_LEVEL':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          level: state.data.level + 1,
-          cultivationStage: getNextCultivationStage(state.data.level + 1)
-        }
-      };
-    case 'UPDATE_CHARACTER_REPUTATION':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          reputation: (state.data.reputation || 0) + action.payload
-        }
-      };
-    default:
-      return state;
-  }
-}
-  switch (action.type) {
-    case 'FETCH_CHARACTER_START':
-      return {
-        ...state,
-        loading: true,
-        error: null
-      };
-    case 'FETCH_CHARACTER_SUCCESS':
-      return {
-        ...state,
-        data: action.payload,
-        loading: false,
-        error: null
-      };
-    case 'FETCH_CHARACTER_ERROR':
-      return {
-        ...state,
-        loading: false,
-        error: action.payload
-      };
-    case 'UPDATE_CHARACTER_ATTRIBUTES':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            ...action.payload
-          },
-          derivedAttrs: calculateDerivedAttributes({
-            ...state.data.baseAttrs,
-            ...action.payload
-          })
-        }
-      };
-    case 'UPDATE_CHARACTER_TITLE':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          title: action.payload
-        }
-      };
-    case 'INCREASE_CHARACTER_LEVEL':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          level: state.data.level + 1,
-          cultivationStage: getNextCultivationStage(state.data.level + 1)
-        }
-      };
-    case 'UPDATE_CHARACTER_REPUTATION':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          reputation: (state.data.reputation || 0) + action.payload
-        }
-      };
-    default:
-      return state;
-  }
-}
-  switch (action.type) {
-    case 'FETCH_CHARACTER_START':
-      return {
-        ...state,
-        loading: true,
-        error: null
-      };
-    case 'FETCH_CHARACTER_SUCCESS':
-      return {
-        ...state,
-        data: action.payload,
-        loading: false,
-        error: null
-      };
-    case 'FETCH_CHARACTER_ERROR':
-      return {
-        ...state,
-        loading: false,
-        error: action.payload
-      };
-    case 'UPDATE_CHARACTER_ATTRIBUTES':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            ...action.payload
-          },
-          derivedAttrs: calculateDerivedAttributes({
-            ...state.data.baseAttrs,
-            ...action.payload
-          })
-        }
-      };
-    case 'UPDATE_CHARACTER_TITLE':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          title: action.payload
-        }
-      };
-    case 'INCREASE_CHARACTER_LEVEL':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          level: state.data.level + 1,
-          cultivationStage: getNextCultivationStage(state.data.level + 1)
-        }
-      };
-    case 'UPDATE_CHARACTER_REPUTATION':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          reputation: (state.data.reputation || 0) + action.payload
-        }
-      };
-    default:
-      return state;
-  }
-}
-  switch (action.type) {
-    case 'FETCH_CHARACTER_START':
-      return {
-        ...state,
-        loading: true,
-        error: null
-      };
-    case 'FETCH_CHARACTER_SUCCESS':
-      return {
-        ...state,
-        data: action.payload,
-        loading: false,
-        error: null
-      };
-    case 'FETCH_CHARACTER_ERROR':
-      return {
-        ...state,
-        loading: false,
-        error: action.payload
-      };
-    case 'UPDATE_CHARACTER_ATTRIBUTES':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            ...action.payload
-          },
-          derivedAttrs: calculateDerivedAttributes({
-            ...state.data.baseAttrs,
-            ...action.payload
-          })
-        }
-      };
-    case 'UPDATE_CHARACTER_TITLE':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          title: action.payload
-        }
-      };
-    case 'INCREASE_CHARACTER_LEVEL':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          level: state.data.level + 1,
-          cultivationStage: getNextCultivationStage(state.data.level + 1)
-        }
-      };
-    case 'UPDATE_CHARACTER_REPUTATION':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          reputation: (state.data.reputation || 0) + action.payload
-        }
-      };
-    default:
-      return state;
-  }
-}
-  switch (action.type) {
-    case 'FETCH_CHARACTER_START':
-      return {
-        ...state,
-        loading: true,
-        error: null
-      };
-    case 'FETCH_CHARACTER_SUCCESS':
-      return {
-        ...state,
-        data: action.payload,
-        loading: false,
-        error: null
-      };
-    case 'FETCH_CHARACTER_ERROR':
-      return {
-        ...state,
-        loading: false,
-        error: action.payload
-      };
-    case 'UPDATE_CHARACTER_ATTRIBUTES':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            ...action.payload
-          },
-          derivedAttrs: calculateDerivedAttributes({
-            ...state.data.baseAttrs,
-            ...action.payload
-          })
-        }
-      };
-    case 'UPDATE_CHARACTER_TITLE':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          title: action.payload
-        }
-      };
-    case 'INCREASE_CHARACTER_LEVEL':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          level: state.data.level + 1,
-          cultivationStage: getNextCultivationStage(state.data.level + 1)
-        }
-      };
-    case 'UPDATE_CHARACTER_REPUTATION':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          reputation: (state.data.reputation || 0) + action.payload
-        }
-      };
-    default:
-      return state;
-  }
-}
-  switch (action.type) {
-    case 'FETCH_CHARACTER_START':
-      return { ...state, loading: true, error: null };
-    case 'FETCH_CHARACTER_SUCCESS':
-      return {
-        ...state,
-        loading: false,
-        data: action.payload,
-        error: null
-      };
-    case 'FETCH_CHARACTER_ERROR':
-      return {
-        ...state,
-        loading: false,
-        error: action.payload
-      case 'UPDATE_CHARACTER_ATTRIBUTES': {
-      if (!state.data) return state;
-      const updatedData = {
-        ...state.data,
-        baseAttrs: {
-          ...state.data.baseAttrs,
-          ...action.payload
-        }
-      };
-      return { ...state, data: updatedData };
-    }
-    case 'UPDATE_CHARACTER_TITLE': {
-      if (!state.data) return state;
-      const updatedData = {
-        ...state.data,
-        title: action.payload
-      };
-      return { ...state, data: updatedData };
-    }
-    case 'CULTIVATE': {
-      if (!state.data) return state;
-      // 计算修炼增加值 (修炼速度 * 基础值)
-      const cultivationGain = Math.floor(100 * (state.data.derivedAttrs.cultivationSpeed / 100 + 1));
       const updatedBaseAttrs = {
         ...state.data.baseAttrs,
-        cultivation: Math.min(
-          state.data.baseAttrs.cultivation + cultivationGain,
-          state.data.baseAttrs.expToNextLevel
-        )
+        ...action.payload
       };
-      const updatedData = {
+      const updatedCharacter = {
         ...state.data,
         baseAttrs: updatedBaseAttrs
       };
-      return { ...state, data: updatedData };
-    }
-    case 'BREAKTHROUGH_SUCCESS': {
+      return {
+        ...state,
+        data: {
+          ...updatedCharacter,
+          derivedAttrs: calculateDerivedAttributes(updatedBaseAttrs, updatedCharacter)
+        }
+      };
+    case 'UPDATE_CHARACTER_TITLE':
       if (!state.data) return state;
-      // 突破成功 - 升级并重置修炼值
-      const updatedBaseAttrs = {
-        ...state.data.baseAttrs,
-        level: state.data.baseAttrs.level + 1,
-        cultivationStage: getNextCultivationStage(state.data.baseAttrs.cultivationStage),
-        cultivation: 0,
-        expToNextLevel: Math.floor(state.data.baseAttrs.expToNextLevel * 1.5)
+      return {
+        ...state,
+        data: {
+          ...state.data,
+          title: action.payload
+        }
       };
-      const updatedData = {
-        ...state.data,
-        baseAttrs: updatedBaseAttrs
-      };
-      return { ...state, data: updatedData };
-    }
-    case 'BREAKTHROUGH_FAILURE': {
+    case 'CULTIVATE_SUCCESS':
       if (!state.data) return state;
-      // 突破失败 - 损失部分修炼值
-      const updatedBaseAttrs = {
+      const newCultivation = state.data.baseAttrs.cultivation + action.payload.cultivationGain;
+      const updatedAttrsAfterCultivation = {
         ...state.data.baseAttrs,
-        cultivation: Math.floor(state.data.baseAttrs.cultivation * 0.7)
+        cultivation: newCultivation
       };
-      const updatedData = {
+      const updatedCharacterAfterCultivation = {
         ...state.data,
-        baseAttrs: updatedBaseAttrs
+        baseAttrs: updatedAttrsAfterCultivation
       };
-      return { ...state, data: updatedData };
-    }
+      return {
+        ...state,
+        data: {
+          ...updatedCharacterAfterCultivation,
+          derivedAttrs: calculateDerivedAttributes(updatedAttrsAfterCultivation, updatedCharacterAfterCultivation)
+        },
+        lastCultivationResult: action.payload
+      };
+    case 'BREAKTHROUGH_SUCCESS':
+      if (!state.data || !action.payload.newStage) return state;
+      const breakthroughAttrs = {
+        ...state.data.baseAttrs,
+        cultivation: action.payload.newStage.minCultivation,
+        cultivationStage: action.payload.newStage.name,
+        level: action.payload.newStage.level
+      };
+      const updatedCharacterAfterBreakthrough = {
+        ...state.data,
+        baseAttrs: breakthroughAttrs
+      };
+      return {
+        ...state,
+        data: {
+          ...updatedCharacterAfterBreakthrough,
+          derivedAttrs: calculateDerivedAttributes(breakthroughAttrs, updatedCharacterAfterBreakthrough)
+        },
+        lastBreakthroughResult: action.payload
+      };
+    case 'BREAKTHROUGH_FAILURE':
+      if (!state.data || !action.payload.penalties) return state;
+      const penaltyAttrs = {
+        ...state.data.baseAttrs,
+        cultivation: Math.max(0, state.data.baseAttrs.cultivation - (action.payload.penalties.cultivationLoss || 0)),
+        soulStrength: Math.max(0, state.data.baseAttrs.soulStrength - (action.payload.penalties.soulStrengthLoss || 0)),
+        vitality: action.payload.penalties.vitalityLoss 
+          ? Math.max(0, state.data.baseAttrs.vitality - action.payload.penalties.vitalityLoss)
+          : state.data.baseAttrs.vitality
+      };
+      const updatedCharacterAfterFailure = {
+        ...state.data,
+        baseAttrs: penaltyAttrs
+      };
+      return {
+        ...state,
+        data: {
+          ...updatedCharacterAfterFailure,
+          derivedAttrs: calculateDerivedAttributes(penaltyAttrs, updatedCharacterAfterFailure)
+        },
+        lastBreakthroughResult: action.payload
+      };
+    case 'SAVE_CHARACTER':
+      if (state.data) {
+        DataService.saveCharacter(state.data);
+      }
+      return state;
     default:
       return state;
   }
 }
 
-// Provider组件
-export function CharacterProvider({ children }: { children: React.ReactNode }) {
+// CharacterProvider组件
+export const CharacterProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(characterReducer, initialState);
 
-  // 模拟数据加载
+  // 初始化数据加载
   useEffect(() => {
     dispatch({ type: 'FETCH_CHARACTER_START' });
-    // 实际项目中这里会是API调用
-    setTimeout(() => {
-      // 从demo.json加载模拟数据
-      const mockData: Character = {
-        baseAttrs: {
-          id: 'char_001',
-          name: '剑仙李白',
-          level: 15,
-          exp: 1250,
-          expToNextLevel: 2000,
-          // 修炼体系核心属性
-          cultivation: 8547,
-          cultivationStage: '筑基·中期',
-          // 五行属性体系
-          affinity: {
-            metal: 75,
-            wood: 45,
-            water: 60,
-            fire: 85,
-            earth: 30
-          },
-          // 核心战斗属性
-          health: 1250,
-          maxHealth: 1250,
-          mana: 850,
-          maxMana: 850,
-          spirit: 350,
-          maxSpirit: 350,
-          // 基础属性
-          soulStrength: 245,
-          physique: 180,
-          vitality: 18000,
-          // 战斗属性
-          attack: 185,
-          defense: 105,
-          speed: 92,
-          critRate: 12.5,
-          dodgeRate: 8.3
-        },
-        derivedAttrs: {
-          totalAttack: 256,
-          totalDefense: 142,
-          damageMultiplier: 1.2,
-          survivalRating: 78,
-          cultivationSpeed: 15, // 修炼速度 +15%/h
-          breakthroughChance: 75 // 突破成功率 75%
-        },
-        title: {
-          id: 'title_003',
-          name: '江湖小虾',
-          description: '初入江湖的修行者',
-          attributeBonuses: {
-            attack: 10,
-            defense: 5
-          },
-          requirements: {
-            level: 10,
-            reputation: 1000
-          }
-        },
-        reputation: 1250,
-        currency: {
-          gold: 12500,
-          gems: 850,
-          contribution: 320
-        },
-        lastActive: new Date()
-      };
-      dispatch({ type: 'FETCH_CHARACTER_SUCCESS', payload: mockData });
-    }, 1000);
+    
+    // 尝试从本地存储加载当前角色
+    const currentCharacterId = DataService.getCurrentCharacterId();
+    if (currentCharacterId) {
+      const character = DataService.loadCharacter(currentCharacterId);
+      if (character) {
+        dispatch({ type: 'FETCH_CHARACTER_SUCCESS', payload: character });
+        return;
+      }
+    }
+    
+    // 如果没有保存的角色，加载默认角色数据
+    import('../data/characters.json').then(data => {
+      const characters = data.default || data;
+      if (characters.length > 0) {
+        const defaultCharacter = characters[0];
+        dispatch({ type: 'FETCH_CHARACTER_SUCCESS', payload: defaultCharacter });
+        DataService.saveCharacter(defaultCharacter);
+        DataService.setCurrentCharacterId(defaultCharacter.baseAttrs.id);
+      }
+    }).catch(error => {
+      dispatch({ type: 'FETCH_CHARACTER_ERROR', payload: '加载角色数据失败' });
+    });
   }, []);
 
-  // 定义更新函数
-  const updateAttributes = (attrs: Partial<Character['baseAttrs']>) => {
-    dispatch({ type: 'UPDATE_CHARACTER_ATTRIBUTES', payload: attrs });
-  };
+  // 更新角色属性
+  const updateAttributes = useCallback((attributes: Partial<Character['baseAttrs']>) => {
+    dispatch({ type: 'UPDATE_CHARACTER_ATTRIBUTES', payload: attributes });
+    // 自动保存
+    setTimeout(() => dispatch({ type: 'SAVE_CHARACTER' }), 100);
+  }, []);
 
-  const updateTitle = (title: Character['title']) => {
+  // 更新角色头衔
+  const updateTitle = useCallback((title: Character['title']) => {
     dispatch({ type: 'UPDATE_CHARACTER_TITLE', payload: title });
+    setTimeout(() => dispatch({ type: 'SAVE_CHARACTER' }), 100);
+  }, []);
+
+  // 修炼功能
+  const cultivate = useCallback(async () => {
+    if (!state.data) return;
+    
+    try {
+      const result = await CultivationService.cultivate(state.data);
+      dispatch({ type: 'CULTIVATE_SUCCESS', payload: result });
+      setTimeout(() => dispatch({ type: 'SAVE_CHARACTER' }), 100);
+    } catch (error) {
+      console.error('修炼失败:', error);
+    }
+  }, [state.data]);
+
+  // 突破功能
+  const breakthrough = useCallback(async () => {
+    if (!state.data) return;
+    
+    try {
+      const result = await CultivationService.attemptBreakthrough(state.data);
+      
+      if (result.success) {
+        dispatch({ type: 'BREAKTHROUGH_SUCCESS', payload: result });
+      } else {
+        dispatch({ type: 'BREAKTHROUGH_FAILURE', payload: result });
+      }
+      
+      setTimeout(() => dispatch({ type: 'SAVE_CHARACTER' }), 100);
+    } catch (error) {
+      console.error('突破失败:', error);
+    }
+  }, [state.data]);
+
+  // 保存角色
+  const saveCharacter = useCallback(() => {
+    dispatch({ type: 'SAVE_CHARACTER' });
+  }, []);
+
+  // 切换角色
+  const switchCharacter = useCallback((characterId: string) => {
+    const character = DataService.loadCharacter(characterId);
+    if (character) {
+      dispatch({ type: 'FETCH_CHARACTER_SUCCESS', payload: character });
+      DataService.setCurrentCharacterId(characterId);
+    }
+  }, []);
+
+  // 创建新角色
+  const createNewCharacter = useCallback((characterData: Omit<Character, 'baseAttrs'> & { baseAttrs: Omit<Character['baseAttrs'], 'id'> }) => {
+    const newCharacter: Character = {
+      ...characterData,
+      baseAttrs: {
+        ...characterData.baseAttrs,
+        id: Date.now().toString()
+      }
+    };
+    
+    DataService.saveCharacter(newCharacter);
+    dispatch({ type: 'FETCH_CHARACTER_SUCCESS', payload: newCharacter });
+    DataService.setCurrentCharacterId(newCharacter.baseAttrs.id);
+  }, []);
+
+  const value: CharacterContextType = {
+    ...state,
+    updateAttributes,
+    updateTitle,
+    cultivate,
+    breakthrough,
+    saveCharacter,
+    switchCharacter,
+    createNewCharacter
   };
 
-  // 添加修炼和突破方法
-  const cultivate = () => {
-    dispatch({ type: 'CULTIVATE' });
-  };
-  
-  const breakthrough = () => {
-    dispatch({ type: 'BREAKTHROUGH_ATTEMPT' });
-  };
-  
   return (
-    <CharacterContext.Provider value={{ 
-      ...state, 
-      updateAttributes, 
-      updateTitle,
-      cultivate,  // 暴露修炼方法
-      breakthrough  // 暴露突破方法
-    }}>
+    <CharacterContext.Provider value={value}>
       {children}
     </CharacterContext.Provider>
   );
-}
+};
 
 // 自定义Hook
-export function useCharacter() {
-  return useSafeContext(CharacterContext, 'Character');
-}
-
-// 辅助函数：获取下一个修炼阶段
-const getNextCultivationStage = (currentStage: string): string => {
-  const stages = ['练气·初期', '练气·中期', '练气·后期', '筑基·初期', '筑基·中期', '筑基·后期', '开光·初期'];
-  const currentIndex = stages.indexOf(currentStage);
-  return currentIndex >= 0 && currentIndex < stages.length - 1 
-    ? stages[currentIndex + 1] 
-    : currentStage;
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            ...action.payload
-          }
-        }
-      };
-    case 'UPDATE_CHARACTER_TITLE':
-      if (!state.data) return state;
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          title: action.payload
-        }
-      };
-    case 'CULTIVATE':
-      if (!state.data) return state;
-      // 计算修炼增加值 (修炼速度 * 基础值)
-      const cultivationGain = Math.floor(100 * (state.data.derivedAttrs.cultivationSpeed / 100 + 1));
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            cultivation: Math.min(
-              state.data.baseAttrs.cultivation + cultivationGain,
-              state.data.baseAttrs.expToNextLevel
-            )
-          }
-        }
-      };
-      
-    case 'BREAKTHROUGH_SUCCESS':
-      if (!state.data) return state;
-      // 突破成功 - 升级并重置修炼值
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            level: state.data.baseAttrs.level + 1,
-            cultivationStage: getNextCultivationStage(state.data.baseAttrs.cultivationStage),
-            cultivation: 0,
-            expToNextLevel: Math.floor(state.data.baseAttrs.expToNextLevel * 1.5)
-          }
-        }
-      };
-      
-    case 'BREAKTHROUGH_FAILURE':
-      if (!state.data) return state;
-      // 突破失败 - 损失部分修炼值
-      return {
-        ...state,
-        data: {
-          ...state.data,
-          baseAttrs: {
-            ...state.data.baseAttrs,
-            cultivation: Math.floor(state.data.baseAttrs.cultivation * 0.7)
-          }
-        }
-      };
-    default:
-      return state;
+export const useCharacter = () => {
+  const context = useContext(CharacterContext);
+  if (context === undefined) {
+    throw new Error('useCharacter must be used within a CharacterProvider');
   }
-}
+  return context;
+};
+
+export default CharacterContext;

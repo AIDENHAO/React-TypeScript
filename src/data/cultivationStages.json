@@ -1,0 +1,374 @@
+{
+  "stages": [
+    {
+      "id": "mortal_qi_early",
+      "name": "练气·初期",
+      "phase": "mortal",
+      "majorLevel": "黄级",
+      "minorLevel": "练气",
+      "subLevel": "初期",
+      "level": 1,
+      "minCultivation": 1,
+      "maxCultivation": 1162,
+      "breakthroughRequirements": {
+        "soulStrength": 50,
+        "items": [],
+        "tasks": []
+      },
+      "bonuses": {
+        "baseAttributes": 5,
+        "skillPoints": 0
+      },
+      "description": "修炼入门，开始感受天地灵气"
+    },
+    {
+      "id": "mortal_qi_mid",
+      "name": "练气·中期",
+      "phase": "mortal",
+      "majorLevel": "黄级",
+      "minorLevel": "练气",
+      "subLevel": "中期",
+      "level": 2,
+      "minCultivation": 1163,
+      "maxCultivation": 2324,
+      "breakthroughRequirements": {
+        "soulStrength": 75,
+        "items": [],
+        "tasks": []
+      },
+      "bonuses": {
+        "baseAttributes": 10,
+        "skillPoints": 0
+      },
+      "description": "灵气运转更加顺畅，体内开始凝聚真气"
+    },
+    {
+      "id": "mortal_qi_late",
+      "name": "练气·后期",
+      "phase": "mortal",
+      "majorLevel": "黄级",
+      "minorLevel": "练气",
+      "subLevel": "后期",
+      "level": 3,
+      "minCultivation": 2325,
+      "maxCultivation": 3486,
+      "breakthroughRequirements": {
+        "soulStrength": 100,
+        "items": [],
+        "tasks": ["引气入体"]
+      },
+      "bonuses": {
+        "baseAttributes": 15,
+        "skillPoints": 0
+      },
+      "description": "真气充盈，准备筑基"
+    },
+    {
+      "id": "mortal_foundation_early",
+      "name": "筑基·初期",
+      "phase": "mortal",
+      "majorLevel": "黄级",
+      "minorLevel": "筑基",
+      "subLevel": "初期",
+      "level": 4,
+      "minCultivation": 3487,
+      "maxCultivation": 5624,
+      "breakthroughRequirements": {
+        "soulStrength": 150,
+        "items": [],
+        "tasks": []
+      },
+      "bonuses": {
+        "baseAttributes": 20,
+        "skillPoints": 0
+      },
+      "description": "筑基成功，真气转化为法力"
+    },
+    {
+      "id": "mortal_foundation_mid",
+      "name": "筑基·中期",
+      "phase": "mortal",
+      "majorLevel": "黄级",
+      "minorLevel": "筑基",
+      "subLevel": "中期",
+      "level": 5,
+      "minCultivation": 5625,
+      "maxCultivation": 7761,
+      "breakthroughRequirements": {
+        "soulStrength": 175,
+        "items": [],
+        "tasks": []
+      },
+      "bonuses": {
+        "baseAttributes": 25,
+        "skillPoints": 0
+      },
+      "description": "法力运转纯熟，可以施展基础法术"
+    },
+    {
+      "id": "mortal_foundation_late",
+      "name": "筑基·后期",
+      "phase": "mortal",
+      "majorLevel": "黄级",
+      "minorLevel": "筑基",
+      "subLevel": "后期",
+      "level": 6,
+      "minCultivation": 7762,
+      "maxCultivation": 9761,
+      "breakthroughRequirements": {
+        "soulStrength": 200,
+        "items": ["筑基丹"],
+        "tasks": []
+      },
+      "bonuses": {
+        "baseAttributes": 30,
+        "skillPoints": 0
+      },
+      "description": "筑基圆满，准备进入修士阶段"
+    },
+    {
+      "id": "cultivator_enlightenment_early",
+      "name": "开光·初期",
+      "phase": "cultivator",
+      "majorLevel": "玄级",
+      "minorLevel": "开光",
+      "subLevel": "初期",
+      "level": 7,
+      "minCultivation": 9762,
+      "maxCultivation": 15409,
+      "breakthroughRequirements": {
+        "soulStrength": 300,
+        "items": [],
+        "tasks": ["宗门开光仪式"]
+      },
+      "bonuses": {
+        "baseAttributes": 35,
+        "skillPoints": 0
+      },
+      "description": "开启灵智，感知天地法则"
+    },
+    {
+      "id": "cultivator_enlightenment_mid",
+      "name": "开光·中期",
+      "phase": "cultivator",
+      "majorLevel": "玄级",
+      "minorLevel": "开光",
+      "subLevel": "中期",
+      "level": 8,
+      "minCultivation": 15410,
+      "maxCultivation": 18232,
+      "breakthroughRequirements": {
+        "soulStrength": 325,
+        "items": [],
+        "tasks": []
+      },
+      "bonuses": {
+        "baseAttributes": 40,
+        "skillPoints": 0
+      },
+      "description": "灵智大开，可以感知更深层的法则"
+    },
+    {
+      "id": "cultivator_enlightenment_late",
+      "name": "开光·后期",
+      "phase": "cultivator",
+      "majorLevel": "玄级",
+      "minorLevel": "开光",
+      "subLevel": "后期",
+      "level": 9,
+      "minCultivation": 18233,
+      "maxCultivation": 21056,
+      "breakthroughRequirements": {
+        "soulStrength": 350,
+        "items": [],
+        "tasks": []
+      },
+      "bonuses": {
+        "baseAttributes": 45,
+        "skillPoints": 0
+      },
+      "description": "开光圆满，准备融合元素"
+    },
+    {
+      "id": "cultivator_fusion_early",
+      "name": "融合·初期",
+      "phase": "cultivator",
+      "majorLevel": "玄级",
+      "minorLevel": "融合",
+      "subLevel": "初期",
+      "level": 10,
+      "minCultivation": 21057,
+      "maxCultivation": 31222,
+      "breakthroughRequirements": {
+        "soulStrength": 400,
+        "items": ["元素晶核"],
+        "tasks": []
+      },
+      "bonuses": {
+        "baseAttributes": 50,
+        "skillPoints": 1
+      },
+      "description": "开始融合元素力量，法术威力大增"
+    },
+    {
+      "id": "cultivator_fusion_mid",
+      "name": "融合·中期",
+      "phase": "cultivator",
+      "majorLevel": "玄级",
+      "minorLevel": "融合",
+      "subLevel": "中期",
+      "level": 11,
+      "minCultivation": 31223,
+      "maxCultivation": 36305,
+      "breakthroughRequirements": {
+        "soulStrength": 425,
+        "items": [],
+        "tasks": []
+      },
+      "bonuses": {
+        "baseAttributes": 55,
+        "skillPoints": 1
+      },
+      "description": "元素融合更加深入，可以施展复合法术"
+    },
+    {
+      "id": "cultivator_fusion_late",
+      "name": "融合·后期",
+      "phase": "cultivator",
+      "majorLevel": "玄级",
+      "minorLevel": "融合",
+      "subLevel": "后期",
+      "level": 12,
+      "minCultivation": 36306,
+      "maxCultivation": 41388,
+      "breakthroughRequirements": {
+        "soulStrength": 450,
+        "items": [],
+        "tasks": []
+      },
+      "bonuses": {
+        "baseAttributes": 60,
+        "skillPoints": 1
+      },
+      "description": "融合圆满，准备心动境界"
+    },
+    {
+      "id": "cultivator_heartmove_early",
+      "name": "心动·初期",
+      "phase": "cultivator",
+      "majorLevel": "玄级",
+      "minorLevel": "心动",
+      "subLevel": "初期",
+      "level": 13,
+      "minCultivation": 41389,
+      "maxCultivation": 59687,
+      "breakthroughRequirements": {
+        "soulStrength": 500,
+        "items": [],
+        "tasks": ["心魔试炼"]
+      },
+      "bonuses": {
+        "baseAttributes": 65,
+        "skillPoints": 1
+      },
+      "description": "心境开始波动，需要克服心魔"
+    },
+    {
+      "id": "cultivator_heartmove_mid",
+      "name": "心动·中期",
+      "phase": "cultivator",
+      "majorLevel": "玄级",
+      "minorLevel": "心动",
+      "subLevel": "中期",
+      "level": 14,
+      "minCultivation": 59688,
+      "maxCultivation": 68837,
+      "breakthroughRequirements": {
+        "soulStrength": 525,
+        "items": [],
+        "tasks": []
+      },
+      "bonuses": {
+        "baseAttributes": 70,
+        "skillPoints": 1
+      },
+      "description": "心境逐渐稳定，法术威力进一步提升"
+    },
+    {
+      "id": "cultivator_heartmove_late",
+      "name": "心动·后期",
+      "phase": "cultivator",
+      "majorLevel": "玄级",
+      "minorLevel": "心动",
+      "subLevel": "后期",
+      "level": 15,
+      "minCultivation": 68838,
+      "maxCultivation": 77986,
+      "breakthroughRequirements": {
+        "soulStrength": 550,
+        "items": [],
+        "tasks": []
+      },
+      "bonuses": {
+        "baseAttributes": 75,
+        "skillPoints": 1
+      },
+      "description": "心动圆满，准备凝聚金丹"
+    },
+    {
+      "id": "cultivator_golden_core_early",
+      "name": "金丹·初期",
+      "phase": "cultivator",
+      "majorLevel": "地级",
+      "minorLevel": "金丹",
+      "subLevel": "初期",
+      "level": 16,
+      "minCultivation": 77987,
+      "maxCultivation": 110924,
+      "breakthroughRequirements": {
+        "soulStrength": 600,
+        "items": [],
+        "tasks": ["凝聚金丹"]
+      },
+      "bonuses": {
+        "baseAttributes": 80,
+        "skillPoints": 2
+      },
+      "description": "凝聚金丹，法力质量发生质变"
+    }
+  ],
+  "phaseDescriptions": {
+    "mortal": {
+      "name": "凡人阶段",
+      "description": "修炼入门阶段，主要是感受和运用天地灵气，为进入修士阶段打基础",
+      "characteristics": ["无法使用灵兵", "修炼速度较慢", "突破相对容易"]
+    },
+    "cultivator": {
+      "name": "修士阶段",
+      "description": "正式踏入修炼之路，开始感悟天地法则，法力运用更加纯熟",
+      "characteristics": ["可以使用灵兵", "无法使用仙器", "突破难度增加", "获得技能点"]
+    },
+    "immortal": {
+      "name": "仙神阶段",
+      "description": "超脱凡俗，掌握强大的仙法神通，每个境界都是质的飞跃",
+      "characteristics": ["可以使用仙器神器", "突破极其困难", "每个大境界圆满获得2技能点"]
+    }
+  },
+  "breakthroughFailurePenalties": {
+    "mortal": {
+      "cultivationLoss": 0.5,
+      "soulStrengthLoss": 5,
+      "description": "凡人阶段突破失败惩罚较轻"
+    },
+    "cultivator": {
+      "cultivationLoss": 0.3,
+      "soulStrengthLoss": 15,
+      "description": "修士阶段突破失败会有较大损失"
+    },
+    "immortal": {
+      "cultivationLoss": 0.1,
+      "vitalityLoss": 0.1,
+      "description": "仙神阶段突破失败会损失生命力"
+    }
+  }
+}

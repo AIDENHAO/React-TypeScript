@@ -1,5 +1,6 @@
 import { Character, CharacterBaseAttributes } from '../types/Character';
 import cultivationStagesData from '../data/cultivationStages.json';
+import { CultivationLogService } from './CultivationLogService';
 
 /**
  * 修炼境界接口定义
@@ -55,7 +56,7 @@ export interface BreakthroughResult {
  * 修炼服务类 - 处理所有修炼相关的业务逻辑
  */
 export class CultivationService {
-  private static stages: CultivationStage[] = cultivationStagesData.stages;
+  private static stages: CultivationStage[] = cultivationStagesData.stages as CultivationStage[];
   private static phaseDescriptions = cultivationStagesData.phaseDescriptions;
   private static failurePenalties = cultivationStagesData.breakthroughFailurePenalties;
 
@@ -127,12 +128,20 @@ export class CultivationService {
   static cultivate(character: Character): CultivationResult {
     const currentStage = this.getCurrentStage(character.baseAttrs.cultivation);
     if (!currentStage) {
-      return {
+      const result = {
         success: false,
         cultivationGain: 0,
         enlightenment: false,
         message: '无法确定当前境界，修炼失败'
       };
+      
+      // 记录修炼失败日志
+      CultivationLogService.addLog({
+        type: 'cultivate',
+        message: result.message
+      });
+      
+      return result;
     }
 
     // 计算修炼增益
@@ -147,14 +156,49 @@ export class CultivationService {
       currentStage.maxCultivation
     );
 
-    let message = `修炼获得 ${cultivationGain} 点修炼值`;
+    const actualGain = newCultivation - character.baseAttrs.cultivation;
+    let message = `修炼获得 ${actualGain} 点修炼值`;
+    
     if (enlightenment) {
       message += '，触发顿悟！修炼效果提升50%';
+      // 记录顿悟日志
+      CultivationLogService.addLog({
+        type: 'enlightenment',
+        message: `触发顿悟！修炼效果提升50%，获得 ${actualGain} 点修炼值`,
+        gains: {
+          cultivation: actualGain
+        }
+      });
+    } else {
+      // 记录普通修炼日志
+      CultivationLogService.addLog({
+        type: 'cultivate',
+        message: message,
+        gains: {
+          cultivation: actualGain
+        }
+      });
+    }
+
+    // 检查是否境界提升
+    const newStage = this.getCurrentStage(newCultivation);
+    if (newStage && newStage.id !== currentStage.id) {
+      const stageChangeMessage = `境界提升！从 ${currentStage.name} 提升到 ${newStage.name}`;
+      CultivationLogService.addLog({
+        type: 'stage_change',
+        message: stageChangeMessage,
+        gains: {
+          stageChange: {
+            from: currentStage.name,
+            to: newStage.name
+          }
+        }
+      });
     }
 
     return {
       success: true,
-      cultivationGain: newCultivation - character.baseAttrs.cultivation,
+      cultivationGain: actualGain,
       enlightenment,
       message
     };
@@ -238,10 +282,18 @@ export class CultivationService {
     const { canBreakthrough, missingRequirements } = this.checkBreakthroughRequirements(character);
     
     if (!canBreakthrough) {
-      return {
+      const result = {
         success: false,
         message: `突破条件不满足：${missingRequirements.join('；')}`
       };
+      
+      // 记录突破条件不满足日志
+      CultivationLogService.addLog({
+        type: 'breakthrough_failure',
+        message: result.message
+      });
+      
+      return result;
     }
 
     const currentStage = this.getCurrentStage(character.baseAttrs.cultivation)!;
@@ -250,19 +302,46 @@ export class CultivationService {
     const isSuccess = Math.random() * 100 < successChance;
 
     if (isSuccess) {
-      return {
+      const result = {
         success: true,
         newStage: nextStage,
         message: `突破成功！进入 ${nextStage.name} 境界！`
       };
+      
+      // 记录突破成功日志
+      CultivationLogService.addLog({
+        type: 'breakthrough_success',
+        message: result.message,
+        gains: {
+          stageChange: {
+            from: currentStage.name,
+            to: nextStage.name
+          }
+        }
+      });
+      
+      return result;
     } else {
       // 突破失败，计算惩罚
       const penalties = this.calculateBreakthroughPenalties(currentStage);
-      return {
+      const result = {
         success: false,
         penalties,
-        message: `突破失败！修炼值损失 ${penalties.cultivationLoss || 0}，灵魂强度损失 ${penalties.soulStrengthLoss || 0}`
+        message: `突破失败！修炼值损失 ${penalties?.cultivationLoss || 0}，灵魂强度损失 ${penalties?.soulStrengthLoss || 0}`
       };
+      
+      // 记录突破失败日志
+      CultivationLogService.addLog({
+        type: 'breakthrough_failure',
+        message: result.message,
+        losses: {
+          cultivation: penalties?.cultivationLoss,
+          soulStrength: penalties?.soulStrengthLoss,
+          vitality: penalties?.vitalityLoss
+        }
+      });
+      
+      return result;
     }
   }
 
@@ -274,8 +353,8 @@ export class CultivationService {
     
     return {
       cultivationLoss: Math.floor(currentStage.maxCultivation * (1 - phasePenalty.cultivationLoss)),
-      soulStrengthLoss: phasePenalty.soulStrengthLoss,
-      vitalityLoss: phasePenalty.vitalityLoss ? Math.floor(currentStage.maxCultivation * phasePenalty.vitalityLoss) : undefined
+      soulStrengthLoss: 'soulStrengthLoss' in phasePenalty ? phasePenalty.soulStrengthLoss : 0,
+      vitalityLoss: 'vitalityLoss' in phasePenalty ? Math.floor(currentStage.maxCultivation * phasePenalty.vitalityLoss) : undefined
     };
   }
 

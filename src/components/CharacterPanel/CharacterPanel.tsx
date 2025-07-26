@@ -1,5 +1,7 @@
 import React from 'react';
 import { useCharacter } from '../../contexts/CharacterContext';
+import CultivationProgress from '../CultivationProgress';
+import CultivationLogComponent from '../CultivationLog';
 import styles from './CharacterPanel.module.scss';
 
 const CharacterPanel: React.FC = () => {
@@ -184,6 +186,12 @@ const safeDerivedAttrs = derivedAttrs || { totalAttack: 0, totalDefense: 0, dama
         <button className={styles.actionButton}>技能</button>
         <button className={styles.actionButton}>头衔</button>
       </div>
+
+      {/* 修炼进度组件 */}
+      <CultivationProgress character={character} />
+
+      {/* 修炼日志组件 */}
+      <CultivationLogComponent maxHeight="300px" showFilters={true} />
     </div>
   );
 };

@@ -8,16 +8,22 @@
 export interface CultivationLog {
   /** 日志唯一标识 */
   id: string;
+  /** 角色ID */
+  characterId: string;
   /** 时间戳 */
   timestamp: Date;
   /** 日志类型 */
-  type: 'cultivate' | 'breakthrough_success' | 'breakthrough_failure' | 'enlightenment' | 'stage_change';
+  type: 'cultivation' | 'breakthrough' | 'insight' | 'stage_change';
   /** 日志消息 */
   message: string;
-  /** 修炼收益详情 */
-  gains?: {
+  /** 详细信息 */
+  details?: {
     /** 修炼值增长 */
     cultivation?: number;
+    /** 经验值增长 */
+    experience?: number;
+    /** 进度 */
+    progress?: number;
     /** 属性变化 */
     attributes?: Record<string, number>;
     /** 境界变化 */
@@ -25,15 +31,12 @@ export interface CultivationLog {
       from: string;
       to: string;
     };
-  };
-  /** 损失详情（突破失败时） */
-  losses?: {
-    /** 修炼值损失 */
-    cultivation?: number;
-    /** 灵魂强度损失 */
-    soulStrength?: number;
-    /** 生命力损失 */
-    vitality?: number;
+    /** 从境界 */
+    fromRealm?: string;
+    /** 到境界 */
+    toRealm?: string;
+    /** 成功标志 */
+    success?: boolean;
   };
 }
 
@@ -53,8 +56,10 @@ export interface CultivationLogConfig {
  * 修炼日志过滤器
  */
 export interface CultivationLogFilter {
+  /** 角色ID过滤 */
+  characterId?: string;
   /** 日志类型过滤 */
-  types?: CultivationLog['type'][];
+  type?: CultivationLog['type'];
   /** 时间范围过滤 */
   dateRange?: {
     start: Date;

@@ -21,9 +21,10 @@ export const CultivationLogComponent: React.FC<CultivationLogProps> = ({
   }, [filter]);
 
   const loadLogs = () => {
+    const logService = CultivationLogService.getInstance();
     const filteredLogs = Object.keys(filter).length > 0 
-      ? CultivationLogService.getFilteredLogs(filter)
-      : CultivationLogService.getAllLogs();
+      ? logService.getFilteredLogs(filter)
+      : logService.getAllLogs();
     setLogs(filteredLogs);
   };
 
@@ -37,14 +38,14 @@ export const CultivationLogComponent: React.FC<CultivationLogProps> = ({
 
   const clearAllLogs = () => {
     if (window.confirm('确定要清空所有修炼日志吗？此操作不可撤销。')) {
-      CultivationLogService.clearLogs();
+      CultivationLogService.getInstance().clearAllLogs();
       loadLogs();
     }
   };
 
   const exportLogs = () => {
     try {
-      const exported = CultivationLogService.exportLogs();
+      const exported = CultivationLogService.getInstance().exportLogs();
       const blob = new Blob([exported], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -61,10 +62,9 @@ export const CultivationLogComponent: React.FC<CultivationLogProps> = ({
 
   const getLogIcon = (type: string) => {
     switch (type) {
-      case 'cultivate': return '🧘';
-      case 'enlightenment': return '💡';
-      case 'breakthrough_success': return '⚡';
-      case 'breakthrough_failure': return '💥';
+      case 'cultivation': return '🧘';
+      case 'insight': return '💡';
+      case 'breakthrough': return '⚡';
       case 'stage_change': return '🌟';
       default: return '📝';
     }
@@ -72,10 +72,9 @@ export const CultivationLogComponent: React.FC<CultivationLogProps> = ({
 
   const getLogTypeText = (type: string) => {
     switch (type) {
-      case 'cultivate': return '修炼';
-      case 'enlightenment': return '顿悟';
-      case 'breakthrough_success': return '突破成功';
-      case 'breakthrough_failure': return '突破失败';
+      case 'cultivation': return '修炼';
+      case 'insight': return '顿悟';
+      case 'breakthrough': return '突破';
       case 'stage_change': return '境界提升';
       default: return '其他';
     }
@@ -144,10 +143,9 @@ export const CultivationLogComponent: React.FC<CultivationLogProps> = ({
               className="filter-select"
             >
               <option value="">所有类型</option>
-              <option value="cultivate">修炼</option>
-              <option value="enlightenment">顿悟</option>
-              <option value="breakthrough_success">突破成功</option>
-              <option value="breakthrough_failure">突破失败</option>
+              <option value="cultivation">修炼</option>
+              <option value="insight">顿悟</option>
+              <option value="breakthrough">突破</option>
               <option value="stage_change">境界提升</option>
             </select>
             

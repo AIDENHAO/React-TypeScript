@@ -136,8 +136,9 @@ export class CultivationService {
       };
       
       // 记录修炼失败日志
-      CultivationLogService.addLog({
-        type: 'cultivate',
+      CultivationLogService.getInstance().addLog({
+        characterId: character.baseAttrs.id,
+        type: 'cultivation',
         message: result.message
       });
       
@@ -162,19 +163,21 @@ export class CultivationService {
     if (enlightenment) {
       message += '，触发顿悟！修炼效果提升50%';
       // 记录顿悟日志
-      CultivationLogService.addLog({
-        type: 'enlightenment',
+      CultivationLogService.getInstance().addLog({
+        characterId: character.baseAttrs.id,
+        type: 'insight',
         message: `触发顿悟！修炼效果提升50%，获得 ${actualGain} 点修炼值`,
-        gains: {
+        details: {
           cultivation: actualGain
         }
       });
     } else {
       // 记录普通修炼日志
-      CultivationLogService.addLog({
-        type: 'cultivate',
+      CultivationLogService.getInstance().addLog({
+        characterId: character.baseAttrs.id,
+        type: 'cultivation',
         message: message,
-        gains: {
+        details: {
           cultivation: actualGain
         }
       });
@@ -184,10 +187,11 @@ export class CultivationService {
     const newStage = this.getCurrentStage(newCultivation);
     if (newStage && newStage.id !== currentStage.id) {
       const stageChangeMessage = `境界提升！从 ${currentStage.name} 提升到 ${newStage.name}`;
-      CultivationLogService.addLog({
+      CultivationLogService.getInstance().addLog({
+        characterId: character.baseAttrs.id,
         type: 'stage_change',
         message: stageChangeMessage,
-        gains: {
+        details: {
           stageChange: {
             from: currentStage.name,
             to: newStage.name
@@ -288,9 +292,13 @@ export class CultivationService {
       };
       
       // 记录突破条件不满足日志
-      CultivationLogService.addLog({
-        type: 'breakthrough_failure',
-        message: result.message
+      CultivationLogService.getInstance().addLog({
+        characterId: character.baseAttrs.id,
+        type: 'breakthrough',
+        message: result.message,
+        details: {
+          success: false
+        }
       });
       
       return result;
@@ -309,10 +317,12 @@ export class CultivationService {
       };
       
       // 记录突破成功日志
-      CultivationLogService.addLog({
-        type: 'breakthrough_success',
+      CultivationLogService.getInstance().addLog({
+        characterId: character.baseAttrs.id,
+        type: 'breakthrough',
         message: result.message,
-        gains: {
+        details: {
+          success: true,
           stageChange: {
             from: currentStage.name,
             to: nextStage.name
@@ -331,13 +341,13 @@ export class CultivationService {
       };
       
       // 记录突破失败日志
-      CultivationLogService.addLog({
-        type: 'breakthrough_failure',
+      CultivationLogService.getInstance().addLog({
+        characterId: character.baseAttrs.id,
+        type: 'breakthrough',
         message: result.message,
-        losses: {
-          cultivation: penalties?.cultivationLoss,
-          soulStrength: penalties?.soulStrengthLoss,
-          vitality: penalties?.vitalityLoss
+        details: {
+          success: false,
+          cultivation: -(penalties?.cultivationLoss || 0)
         }
       });
       

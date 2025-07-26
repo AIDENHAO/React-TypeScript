@@ -1,32 +1,51 @@
 import { Character } from '../types/Character';
 import charactersData from '../data/characters.json';
+import { BaseDataService } from './BaseDataService';
 
 /**
  * 数据服务类 - 处理角色数据的持久化存储
  */
-export class DataService {
-  private static readonly STORAGE_KEY = 'cultivation_game_characters';
+export class DataService extends BaseDataService<Character> {
   private static readonly SETTINGS_KEY = 'cultivation_game_settings';
   private static readonly CURRENT_CHARACTER_KEY = 'cultivation_game_current_character';
+  private static instance: DataService;
+  
+  protected storageKey = 'cultivation_game_characters';
+  
+  /**
+   * 获取单例实例
+   */
+  private static getInstance(): DataService {
+    if (!DataService.instance) {
+      DataService.instance = new DataService();
+    }
+    return DataService.instance;
+  }
 
+  /**
+   * 验证角色数据格式
+   */
+  protected validateData(character: Character): boolean {
+    return !!(character?.baseAttrs?.id && character?.baseAttrs?.name);
+  }
+  
+  /**
+   * 获取默认角色数据
+   */
+  protected getDefaultData(): Character[] {
+    return this.transformDefaultCharacters();
+  }
+  
   /**
    * 保存单个角色数据
    */
   static saveCharacter(character: Character): void {
     try {
-      const existingData = this.loadAllCharacters();
-      const index = existingData.findIndex(c => c.baseAttrs.id === character.baseAttrs.id);
-      
       // 更新最后活跃时间
       character.lastActive = new Date();
       
-      if (index >= 0) {
-        existingData[index] = character;
-      } else {
-        existingData.push(character);
-      }
-      
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(existingData));
+      const instance = DataService.getInstance();
+      instance.save(character, (char) => char.baseAttrs.id);
       console.log(`角色 ${character.baseAttrs.name} 数据已保存`);
     } catch (error) {
       console.error('保存角色数据失败:', error);
@@ -39,8 +58,8 @@ export class DataService {
    */
   static loadCharacter(id: string): Character | null {
     try {
-      const allCharacters = this.loadAllCharacters();
-      const character = allCharacters.find(c => c.baseAttrs.id === id);
+      const instance = DataService.getInstance();
+      const character = instance.findById(id, (char) => char.baseAttrs.id);
       
       if (character) {
         // 确保日期对象正确转换
@@ -48,7 +67,7 @@ export class DataService {
         console.log(`角色 ${character.baseAttrs.name} 数据已加载`);
       }
       
-      return character || null;
+      return character;
     } catch (error) {
       console.error('加载角色数据失败:', error);
       return null;
@@ -58,33 +77,33 @@ export class DataService {
   /**
    * 加载所有角色数据
    */
-  static loadAllCharacters(): Character[] {
+  static getAllCharacters(): Character[] {
     try {
-      const data = localStorage.getItem(this.STORAGE_KEY);
+      const instance = DataService.getInstance();
+      const characters = instance.getAll();
       
-      if (data) {
-        const characters = JSON.parse(data) as Character[];
-        // 确保日期对象正确转换
-        return characters.map(char => ({
-          ...char,
-          lastActive: new Date(char.lastActive)
-        }));
-      } else {
-        // 如果本地存储为空，返回默认数据
-        console.log('本地存储为空，加载默认角色数据');
-        return this.getDefaultCharacters();
-      }
+      // 确保日期对象正确转换
+      return characters.map(char => ({
+        ...char,
+        lastActive: new Date(char.lastActive)
+      }));
     } catch (error) {
       console.error('加载角色数据失败:', error);
-      // 发生错误时返回默认数据
-      return this.getDefaultCharacters();
+      return [];
     }
+  }
+  
+  /**
+   * 加载所有角色数据（别名方法，保持向后兼容）
+   */
+  static loadAllCharacters(): Character[] {
+    return this.getAllCharacters();
   }
 
   /**
-   * 获取默认角色数据
+   * 转换默认角色数据
    */
-  private static getDefaultCharacters(): Character[] {
+  private transformDefaultCharacters(): Character[] {
     return charactersData.map(charData => ({
       baseAttrs: {
         id: charData.id,
@@ -146,17 +165,16 @@ export class DataService {
    */
   static deleteCharacter(id: string): boolean {
     try {
-      const existingData = this.loadAllCharacters();
-      const filteredData = existingData.filter(c => c.baseAttrs.id !== id);
+      const instance = DataService.getInstance();
+      const success = instance.delete(id, (char) => char.baseAttrs.id);
       
-      if (filteredData.length === existingData.length) {
+      if (success) {
+        console.log(`角色 ${id} 已删除`);
+      } else {
         console.warn(`未找到ID为 ${id} 的角色`);
-        return false;
       }
       
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(filteredData));
-      console.log(`角色 ${id} 已删除`);
-      return true;
+      return success;
     } catch (error) {
       console.error('删除角色数据失败:', error);
       return false;
@@ -200,7 +218,7 @@ export class DataService {
     const currentId = this.getCurrentCharacterId();
     if (!currentId) {
       // 如果没有设置当前角色，返回第一个角色
-      const allCharacters = this.loadAllCharacters();
+      const allCharacters = this.getAllCharacters();
       if (allCharacters.length > 0) {
         this.setCurrentCharacter(allCharacters[0].baseAttrs.id);
         return allCharacters[0];
@@ -319,7 +337,8 @@ export class DataService {
    */
   static clearAllData(): void {
     try {
-      localStorage.removeItem(this.STORAGE_KEY);
+      const instance = DataService.getInstance();
+      instance.clear();
       localStorage.removeItem(this.CURRENT_CHARACTER_KEY);
       localStorage.removeItem(this.SETTINGS_KEY);
       console.log('所有游戏数据已清空');
@@ -337,15 +356,16 @@ export class DataService {
     lastSaveTime: Date | null;
   } {
     try {
-      const characters = this.loadAllCharacters();
-      const storageData = localStorage.getItem(this.STORAGE_KEY) || '';
+      const instance = DataService.getInstance();
+      const stats = instance.getStats();
+      const characters = instance.getAll();
       const lastSaveTime = characters.length > 0 
-        ? new Date(Math.max(...characters.map(c => c.lastActive.getTime())))
+        ? new Date(Math.max(...characters.map(c => new Date(c.lastActive).getTime())))
         : null;
       
       return {
-        totalCharacters: characters.length,
-        totalStorageSize: new Blob([storageData]).size,
+        totalCharacters: stats.total,
+        totalStorageSize: stats.storageSize,
         lastSaveTime
       };
     } catch (error) {

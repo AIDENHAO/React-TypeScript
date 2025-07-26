@@ -84,14 +84,14 @@ const TestPage: React.FC = () => {
       addTestResult(`✅ 修炼速度计算: ${speed.toFixed(2)}%`);
 
       // 测试顿悟检查
-      const enlightenment = CultivationService.checkEnlightenment(character);
+      const enlightenment = CultivationService.checkForInsight(character);
       addTestResult(`✅ 顿悟检查: ${enlightenment ? '触发' : '未触发'}`);
 
       // 测试突破条件检查
-      const { canBreakthrough, missingRequirements } = CultivationService.checkBreakthroughRequirements(character);
+      const canBreakthrough = CultivationService.canBreakthrough(character);
       addTestResult(`✅ 突破条件检查: ${canBreakthrough ? '满足' : '不满足'}`);
       if (!canBreakthrough) {
-        addTestResult(`   缺少条件: ${missingRequirements.join(', ')}`);
+        addTestResult(`   当前进度不足以突破`);
       }
 
       // 测试突破成功率计算
@@ -99,8 +99,9 @@ const TestPage: React.FC = () => {
       addTestResult(`✅ 突破成功率: ${chance.toFixed(2)}%`);
 
       // 测试当前境界获取
-      const currentStage = CultivationService.getCurrentStage(character.baseAttrs.cultivation);
-      addTestResult(`✅ 当前境界: ${currentStage?.name || '未知'}`);
+      const currentRealm = character.cultivationAttrs.realm;
+      const currentStage = character.cultivationAttrs.stage;
+      addTestResult(`✅ 当前境界: ${currentRealm} 第${currentStage}层`);
 
       addTestResult('🧪 CultivationService测试完成');
     } catch (error) {
@@ -113,43 +114,48 @@ const TestPage: React.FC = () => {
 
     try {
       // 测试添加日志
-      CultivationLogService.addLog({
-        type: 'cultivate',
+      const logService = CultivationLogService.getInstance();
+      
+      logService.addLog({
+        characterId: character?.baseAttrs.id || 'test',
+        type: 'cultivation',
         message: '测试修炼日志',
-        gains: { cultivation: 100 }
+        details: { progress: 100 }
       });
       addTestResult('✅ 添加修炼日志: 成功');
 
-      CultivationLogService.addLog({
-        type: 'enlightenment',
+      logService.addLog({
+        characterId: character?.baseAttrs.id || 'test',
+        type: 'insight',
         message: '测试顿悟日志',
-        gains: { cultivation: 150 }
+        details: { progress: 150 }
       });
       addTestResult('✅ 添加顿悟日志: 成功');
 
-      CultivationLogService.addLog({
-        type: 'breakthrough_success',
+      logService.addLog({
+        characterId: character?.baseAttrs.id || 'test',
+        type: 'breakthrough',
         message: '测试突破成功日志',
-        gains: {
-          stageChange: {
-            from: '练气初期',
-            to: '练气中期'
-          }
+        details: { 
+          fromRealm: '练气期',
+          toRealm: '筑基期',
+          fromStage: 9,
+          toStage: 1
         }
       });
       addTestResult('✅ 添加突破成功日志: 成功');
 
       // 测试获取日志
-      const allLogs = CultivationLogService.getAllLogs();
+      const allLogs = logService.getAllLogs();
       addTestResult(`✅ 获取所有日志: ${allLogs.length} 条`);
 
       // 测试过滤日志
-      const cultivateLogs = CultivationLogService.getFilteredLogs({ type: 'cultivate' });
+      const cultivateLogs = logService.getFilteredLogs({ type: 'cultivation' });
       addTestResult(`✅ 过滤修炼日志: ${cultivateLogs.length} 条`);
 
       // 测试统计信息
-      const stats = CultivationLogService.getStats();
-      addTestResult(`✅ 日志统计: 总计 ${stats.totalLogs} 条，今日 ${stats.todayLogs} 条`);
+      const stats = logService.getLogStats(character?.baseAttrs.id || 'test');
+      addTestResult(`✅ 日志统计: 总计 ${stats.total} 条，修炼 ${stats.cultivation} 条`);
 
       addTestResult('🧪 日志服务测试完成');
     } catch (error) {
@@ -162,7 +168,12 @@ const TestPage: React.FC = () => {
   };
 
   const clearAllLogs = () => {
-    CultivationLogService.clearLogs();
+    const logService = CultivationLogService.getInstance();
+    if (character?.baseAttrs.id) {
+      logService.clearLogs(character.baseAttrs.id);
+    } else {
+      logService.clearAllLogs();
+    }
     addTestResult('🗑️ 已清空所有日志');
   };
 

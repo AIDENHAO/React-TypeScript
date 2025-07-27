@@ -1,0 +1,419 @@
+// 游戏主场景样式文件
+.gameMainScene {
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #2c5530 0%, #1a3d1f 50%, #0f2612 100%);
+  position: relative;
+  overflow: hidden;
+  font-family: 'Microsoft YaHei', sans-serif;
+}
+
+// 顶部信息栏
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: linear-gradient(90deg, rgba(139, 195, 74, 0.2) 0%, rgba(76, 175, 80, 0.1) 100%);
+  border-bottom: 2px solid rgba(139, 195, 74, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+// 人物信息区域
+.characterInfo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.avatarContainer {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #8bc34a;
+  box-shadow: 0 0 20px rgba(139, 195, 74, 0.5);
+}
+
+.avatarFrame {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border: 2px solid #ffd700;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #ffd700, #ffeb3b, #ffd700);
+  animation: rotate 3s linear infinite;
+  z-index: -1;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.characterDetails {
+  color: white;
+}
+
+.characterName {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(45deg, #ffd700, #ffeb3b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.characterLevel {
+  font-size: 14px;
+  color: #8bc34a;
+  margin-top: 5px;
+}
+
+// 战务力显示
+.powerDisplay {
+  text-align: center;
+  color: white;
+}
+
+.powerLabel {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ffd700;
+  margin-bottom: 5px;
+}
+
+.powerValue {
+  font-size: 32px;
+  font-weight: bold;
+  color: #ff6b35;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  margin-bottom: 8px;
+}
+
+.powerProgress {
+  width: 200px;
+}
+
+.progressBar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b35, #ffd700);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+// 顶部功能按钮
+.topActions {
+  display: flex;
+  gap: 10px;
+}
+
+.actionBtn {
+  padding: 8px 16px;
+  background: linear-gradient(45deg, #4caf50, #8bc34a);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+// 宗门标识
+.sectionLabel {
+  position: absolute;
+  top: 120px;
+  left: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(45deg, rgba(139, 195, 74, 0.9), rgba(76, 175, 80, 0.8));
+  padding: 10px 20px;
+  border-radius: 25px;
+  border: 2px solid #ffd700;
+  z-index: 10;
+}
+
+.labelText {
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.labelIcon {
+  font-size: 20px;
+}
+
+// 地图容器
+.mapContainer {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 300px);
+  margin-top: 20px;
+  padding: 20px;
+}
+
+.mapBackground {
+  width: 100%;
+  height: 100%;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%234caf50;stop-opacity:0.3" /><stop offset="50%" style="stop-color:%238bc34a;stop-opacity:0.2" /><stop offset="100%" style="stop-color:%232e7d32;stop-opacity:0.4" /></linearGradient></defs><rect width="800" height="600" fill="url(%23bg)" /><path d="M100,500 Q200,400 300,450 T500,400 T700,450" stroke="%234caf50" stroke-width="3" fill="none" opacity="0.6" /><circle cx="150" cy="200" r="80" fill="%238bc34a" opacity="0.3" /><circle cx="400" cy="150" r="60" fill="%234caf50" opacity="0.4" /><circle cx="600" cy="300" r="70" fill="%232e7d32" opacity="0.3" /></svg>') center/cover;
+  border-radius: 20px;
+  position: relative;
+  border: 3px solid rgba(139, 195, 74, 0.5);
+  box-shadow: inset 0 0 50px rgba(139, 195, 74, 0.2);
+}
+
+// 地图区域点
+.mapArea {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+.areaIcon {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(45deg, #4caf50, #8bc34a);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  border: 3px solid #ffd700;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(139, 195, 74, 0.7); }
+  50% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 10px rgba(139, 195, 74, 0); }
+}
+
+.areaName {
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+// 地图区域位置
+.area1 { top: 20%; left: 15%; }
+.area2 { top: 15%; right: 25%; }
+.area3 { top: 40%; left: 25%; }
+.area4 { bottom: 30%; left: 20%; }
+.area5 { top: 30%; right: 15%; }
+.area6 { bottom: 20%; right: 20%; }
+
+// 底部导航
+.bottomNavigation {
+  position: absolute;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: 2px solid rgba(139, 195, 74, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.navBtn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(45deg, #4caf50, #8bc34a);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(139, 195, 74, 0.4);
+  }
+  
+  &.active {
+    background: linear-gradient(45deg, #ffd700, #ffeb3b);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+  }
+}
+
+.navIcon {
+  font-size: 20px;
+}
+
+// 底部信息面板
+.bottomPanel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.95) 100%);
+  border-top: 2px solid rgba(139, 195, 74, 0.5);
+  backdrop-filter: blur(15px);
+}
+
+.panelTabs {
+  display: flex;
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(139, 195, 74, 0.3);
+}
+
+.panelTab {
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  color: #8bc34a;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 2px solid transparent;
+  
+  &:hover {
+    color: #ffd700;
+  }
+  
+  &.active {
+    color: #ffd700;
+    border-bottom-color: #ffd700;
+  }
+}
+
+.panelContent {
+  padding: 15px 20px;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.newsItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(139, 195, 74, 0.2);
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.newsAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #8bc34a;
+}
+
+.newsText {
+  flex: 1;
+  color: white;
+}
+
+.newsTitle {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.newsSubtitle {
+  font-size: 12px;
+  color: #8bc34a;
+}
+
+.newsTime {
+  font-size: 12px;
+  color: #999;
+}
+
+.newsAction {
+  padding: 6px 12px;
+  background: linear-gradient(45deg, #4caf50, #8bc34a);
+  color: white;
+  border: none;
+  border-radius: 15px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(139, 195, 74, 0.4);
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .topBar {
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
+  }
+  
+  .characterInfo {
+    justify-content: center;
+  }
+  
+  .powerDisplay {
+    order: -1;
+  }
+  
+  .mapContainer {
+    height: calc(100vh - 350px);
+  }
+  
+  .bottomNavigation {
+    bottom: 140px;
+  }
+  
+  .areaIcon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+  
+  .areaName {
+    font-size: 10px;
+  }
+}

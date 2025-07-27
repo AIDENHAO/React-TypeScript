@@ -3,23 +3,43 @@ import { CultivationLogService } from '../services/CultivationLogService';
 import { CultivationLog, CultivationLogFilter } from '../types/CultivationLog';
 import './CultivationLog.css';
 
+/**
+ * 修炼日志组件的属性接口
+ */
 interface CultivationLogProps {
+  /** 日志容器的最大高度，默认为 '400px' */
   maxHeight?: string;
+  /** 是否显示过滤器，默认为 true */
   showFilters?: boolean;
 }
 
+/**
+ * 修炼日志组件
+ * 显示角色的修炼历史记录，支持按类型和关键词过滤
+ * 提供展开/收起、导出、清空等功能
+ * @param {CultivationLogProps} props - 组件属性
+ * @returns {JSX.Element} 修炼日志组件
+ */
 export const CultivationLogComponent: React.FC<CultivationLogProps> = ({ 
   maxHeight = '400px',
   showFilters = true 
 }) => {
+  // 日志列表状态
   const [logs, setLogs] = useState<CultivationLog[]>([]);
+  // 过滤条件状态
   const [filter, setFilter] = useState<CultivationLogFilter>({});
+  // 展开/收起状态
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // 当过滤条件变化时重新加载日志
   useEffect(() => {
     loadLogs();
   }, [filter]);
 
+  /**
+   * 加载日志数据
+   * 根据当前过滤条件获取相应的日志列表
+   */
   const loadLogs = () => {
     const logService = CultivationLogService.getInstance();
     const filteredLogs = Object.keys(filter).length > 0 

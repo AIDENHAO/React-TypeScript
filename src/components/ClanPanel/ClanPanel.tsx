@@ -1,15 +1,40 @@
 import React from 'react';
-import { useClan, ClanData } from '../../contexts/ClanContext';
+import { useClan } from '../../contexts/ClanContext';
 import styles from './ClanPanel.module.scss';
 
+/**
+ * 宗门面板组件
+ * 显示宗门的详细信息，包括基础规模、资源产出、防御战争属性、建筑列表等
+ * 提供宗门管理相关的操作按钮
+ * @returns {JSX.Element} 宗门面板组件
+ */
 const ClanPanel: React.FC = () => {
-  const { data: clan, loading, error } = useClan();
+  // 从宗门上下文获取宗门数据和状态
+  const { currentClan: clan, isLoading, error } = useClan();
 
-  if (loading) return <div className={styles.loading}>加载中...</div>;
+  // 加载状态处理
+  if (isLoading) return <div className={styles.loading}>加载中...</div>;
+  // 错误状态处理
   if (error) return <div className={styles.error}>错误: {error}</div>;
-  if (!clan) return null;
+  // 无宗门数据时不渲染
+  if (!clan) {
+    return (
+      <div className={styles.clanPanel}>
+        <div className={styles.noClan}>
+          <p>请先选择或创建一个宗门</p>
+        </div>
+      </div>
+    );
+  }
 
-  const { baseAttrs = {}, battleAttrs = {}, specialAttrs = {}, buildings = [], resources = {} } = clan;
+  // 解构宗门数据，提供默认值防止未定义错误
+  const { 
+    baseAttrs = {},      // 基础属性
+    battleAttrs = {},    // 战斗属性
+    specialAttrs = {},   // 特殊属性
+    buildings = [],      // 建筑列表
+    resources = {}       // 资源信息
+  } = clan;
 
   return (
     <div className={styles.clanPanel}>
@@ -99,17 +124,17 @@ const ClanPanel: React.FC = () => {
       <div className={styles.buildingsSection}>
         <h4 className={styles.sectionTitle}>主要建筑</h4>
         <div className={styles.buildingsList}>
-          {buildings.map((building: ClanData['buildings'][0], index: number) => (
+          {buildings.map((building: any, index: number) => (
             <div key={index} className={styles.buildingItem}>
               <span className={styles.buildingName}>{building.name}</span>
               <div className={styles.buildingProgress}>
                 <div
                   className={styles.progressBar}
-                  style={{ width: `${building.level / building.maxLevel * 100}%` }}
+                  style={{ width: `${building.level / (building.maxLevel || 10) * 100}%` }}
                 ></div>
               </div>
               <span className={styles.buildingLevel}>
-                Lv.{building.level}/{building.maxLevel}
+                Lv.{building.level}/{building.maxLevel || 10}
               </span>
             </div>
           ))}

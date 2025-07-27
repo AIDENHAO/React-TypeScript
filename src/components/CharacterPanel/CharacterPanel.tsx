@@ -4,19 +4,41 @@ import CultivationProgress from '../CultivationProgress';
 import CultivationLogComponent from '../CultivationLog';
 import styles from './CharacterPanel.module.scss';
 
+/**
+ * 角色面板组件
+ * 显示角色的详细属性信息，包括基础属性、修炼体系、五行亲和、战斗属性、货币等
+ * 提供修炼、突破等操作按钮，以及修炼进度和日志显示
+ * @returns {JSX.Element} 角色面板组件
+ */
 const CharacterPanel: React.FC = () => {
-  const { data: character, loading, error, cultivate, breakthrough } = useCharacter();
+  // 从角色上下文获取角色数据和操作方法
+  const { currentCharacter: character } = useCharacter();
 
-  if (loading) return <div className={styles.loading}>加载中...</div>;
-  if (error) return <div className={styles.error}>错误: {error}</div>;
-  if (!character) return null;
+  // 无角色数据时不渲染
+  if (!character) {
+    return (
+      <div className={styles.characterPanel}>
+        <div className={styles.noCharacter}>
+          <p>请先选择或创建一个角色</p>
+        </div>
+      </div>
+    );
+  }
 
+  // 解构角色数据
   const { baseAttrs, derivedAttrs, title, currency, reputation } = character;
 
-// 确保所有属性都有安全的默认值
-const safeDerivedAttrs = derivedAttrs || { totalAttack: 0, totalDefense: 0, damageMultiplier: 1, survivalRating: 0, cultivationSpeed: 0, breakthroughChance: 0 };
+  // 确保所有衍生属性都有安全的默认值，防止未定义错误
+  const safeDerivedAttrs = derivedAttrs || { 
+    totalAttack: 0, 
+    totalDefense: 0, 
+    damageMultiplier: 1, 
+    survivalRating: 0, 
+    cultivationSpeed: 0, 
+    breakthroughChance: 0 
+  };
 
-  // 计算修炼进度百分比
+  // 计算修炼进度百分比（0-100%）
   const cultivationProgress = baseAttrs.cultivation && baseAttrs.expToNextLevel ? 
     Math.min(100, Math.max(0, (baseAttrs.cultivation / baseAttrs.expToNextLevel) * 100)) : 0;
 
@@ -179,8 +201,8 @@ const safeDerivedAttrs = derivedAttrs || { totalAttack: 0, totalDefense: 0, dama
       </div>
 
       <div className={styles.actionButtons}>
-        <button className={styles.actionButton} onClick={() => cultivate()}>修炼</button>
-        <button className={styles.actionButton} onClick={() => breakthrough()}>突破</button>
+        <button className={styles.actionButton} onClick={() => console.log('修炼功能待实现')}>修炼</button>
+        <button className={styles.actionButton} onClick={() => console.log('突破功能待实现')}>突破</button>
         <button className={styles.actionButton}>属性加点</button>
         <button className={styles.actionButton}>装备</button>
         <button className={styles.actionButton}>技能</button>

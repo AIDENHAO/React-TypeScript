@@ -71,7 +71,7 @@ export const CharacterProvider: React.FC<CharacterProviderProps> = ({ children }
    * @param characterId 角色ID
    */
   const selectCharacter = (characterId: string) => {
-    const character = characters.find(c => c.baseAttrs.name === characterId);
+    const character = characters.find(c => c.baseAttrs.id === characterId);
     if (character) {
       setCurrentCharacter(character);
     }
@@ -99,11 +99,11 @@ export const CharacterProvider: React.FC<CharacterProviderProps> = ({ children }
     try {
       DataService.saveCharacter(character);
       setCharacters(prev => 
-        prev.map(c => c.baseAttrs.name === character.baseAttrs.name ? character : c)
+        prev.map(c => c.baseAttrs.id === character.baseAttrs.id ? character : c)
       );
       
       // 如果更新的是当前角色，同步更新当前角色状态
-      if (currentCharacter && currentCharacter.baseAttrs.name === character.baseAttrs.name) {
+      if (currentCharacter && currentCharacter.baseAttrs.id === character.baseAttrs.id) {
         setCurrentCharacter(character);
       }
     } catch (error) {
@@ -118,11 +118,11 @@ export const CharacterProvider: React.FC<CharacterProviderProps> = ({ children }
   const deleteCharacter = async (characterId: string) => {
     try {
       DataService.deleteCharacter(characterId);
-      setCharacters(prev => prev.filter(c => c.baseAttrs.name !== characterId));
+      setCharacters(prev => prev.filter(c => c.baseAttrs.id !== characterId));
       
       // 如果删除的是当前角色，清空当前角色或选择其他角色
-      if (currentCharacter && currentCharacter.baseAttrs.name === characterId) {
-        const remainingCharacters = characters.filter(c => c.baseAttrs.name !== characterId);
+      if (currentCharacter && currentCharacter.baseAttrs.id === characterId) {
+        const remainingCharacters = characters.filter(c => c.baseAttrs.id !== characterId);
         setCurrentCharacter(remainingCharacters.length > 0 ? remainingCharacters[0] : null);
       }
     } catch (error) {

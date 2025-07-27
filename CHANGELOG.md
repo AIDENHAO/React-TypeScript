@@ -57,6 +57,43 @@
 
 ### 修复 (Fixed)
 
+#### 2024-12-19 - Context Hook 使用错误修复
+
+**修复内容：**
+- **CharacterPanel.tsx**: 修复 `useCharacter` hook 的错误解构方式
+  - 将 `const { data, loading, error, cultivate, breakthrough } = useCharacter();` 修改为 `const { currentCharacter: character } = useCharacter();`
+  - 移除了不存在的 `loading` 和 `error` 状态处理
+  - 更新了"修炼"和"突破"按钮的点击事件为日志输出
+
+- **ClanPanel.tsx**: 修复 `useClan` hook 的错误解构方式
+  - 将 `const { data, loading, error } = useClan();` 修改为 `const { currentClan: clan, isLoading, error } = useClan();`
+  - 调整了无宗门数据时的渲染逻辑
+  - 修复了建筑进度条的计算方式
+
+- **TestPage.tsx**: 修复 Context hook 的使用问题
+  - 将 `useCharacter` 的解构方式从 `data, loading, error, cultivate, breakthrough` 更改为只解构 `currentCharacter`
+  - 移除了加载和错误状态处理
+  - 更新了突破条件检查和境界获取的逻辑
+
+**配置文件修复：**
+- **tsconfig.node.json**: 修复错误的文件引用
+  - 将 `"include": ["vite.config.ts"]` 修改为 `"include": ["vite.config.js"]`
+  - 解决了配置文件引用不匹配的问题
+
+**问题原因：**
+- Context Provider 返回的接口与组件中使用的解构方式不匹配
+- 配置文件中引用了不存在的 TypeScript 配置文件
+
+**解决方案：**
+- 统一了 Context hook 的使用方式，确保解构的属性名与 Provider 返回的接口一致
+- 更新了配置文件引用，使其指向正确的文件
+
+**影响范围：**
+- 文件：`src/components/CharacterPanel/CharacterPanel.tsx`
+- 文件：`src/components/ClanPanel/ClanPanel.tsx`
+- 文件：`src/pages/TestPage.tsx`
+- 文件：`tsconfig.node.json`
+
 #### CultivationService.ts 类型安全修复
 
 **修复内容：**
